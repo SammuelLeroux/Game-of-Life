@@ -11,24 +11,11 @@ hs_err_pid*
 
 # Fichiers spécifiques à l'IDE (VS Code, IntelliJ, Eclipse)
 .vscode/
-.idea/
-*.iml
-*.ipr
-*.iws
-*.swp
-*.swo
 
 # Fichiers spécifiques à Maven
 target/
-!target/.gitkeep # (optionnel si tu veux garder le dossier vide dans Git)
 mvnw
 mvnw.cmd
-
-# Fichiers spécifiques à Gradle (si utilisé)
-.gradle/
-build/
-!build.gradle
-!settings.gradle
 
 # Fichiers spécifiques à JavaFX (si générés)
 .fxbuild/
