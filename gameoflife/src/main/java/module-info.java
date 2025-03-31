@@ -3,5 +3,5 @@ module com.gameoflife {
     requires javafx.fxml;
 
     opens com.gameoflife to javafx.fxml;
-    exports com.gameoflife;
+    exports com.gameoflife to javafx.fxml, javafx.graphics;
 }
