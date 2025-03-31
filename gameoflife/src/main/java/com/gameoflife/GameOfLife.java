@@ -6,6 +6,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
 import javafx.application.Platform;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -15,6 +16,7 @@ import javafx.stage.Stage;
 
 public class GameOfLife extends Application {
     public static Grid grid;
+    private GridPane gridPane;
 
     public GameOfLife(String gridDimension) {
         GameOfLife.grid = new Grid(gridDimension);
@@ -22,14 +24,25 @@ public class GameOfLife extends Application {
 
     private void changeState() {
         int dimension = GameOfLife.grid.getDimension();
-        Grid newGrid = new Grid(dimension);
+        Grid newGrid = new Grid(dimension, false);
 
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
-                newGrid.setCell(i, j, getChangeState(GameOfLife.grid.getCell(i, j), i, j));
+                int currentState = GameOfLife.grid.getCell(i, j);
+                int newState = getChangeState(currentState, i, j);
+                newGrid.setCell(i, j, newState);
             }
         }
         GameOfLife.grid.grid = newGrid.grid;
+    }
+
+    public boolean gameOver() {
+        if (GameOfLife.grid.getNbLivingCells() == 0) {
+            System.out.println("GAME OVER");
+            return true;
+        }
+
+        return false;
     }
 
     @Override
@@ -37,39 +50,32 @@ public class GameOfLife extends Application {
         // set title for the stage
         stage.setTitle("Game of Life");
 
-        GridPane gridPane = createGridPane();
+        this.gridPane = createGridPane();
+        VBox layout = new VBox(10, this.gridPane);
+        Scene scene = new Scene(layout, 500, 500);
+        stage.setScene(scene);
+        stage.show();
+
         // Set up the timeline to update the grid every 10 seconds
         Timeline timeline = new Timeline(
-            new KeyFrame(Duration.seconds(5), event -> {
+            new KeyFrame(Duration.seconds(2), event -> {
+                if (gameOver())return;
+
                 // Change the grid state
                 changeState();
 
                 // Update the grid pane on the JavaFX application thread
-                Platform.runLater(() -> {
-                    // Recreate the grid with updated states
-                    GridPane newGridPane = createGridPane();
-                    VBox layout = new VBox(10, newGridPane); // Re-create layout with new grid
-                    Scene scene = new Scene(layout, 500, 500);
-                    stage.setScene(scene); // Set new scene with updated grid
-                    stage.show();
-                });
+                Platform.runLater(this::updateGridPane);
             })
         );
         timeline.setCycleCount(Timeline.INDEFINITE); // Keep running indefinitely
         timeline.play();
-        
-        // Création de la scene et affichage
-        VBox layout = new VBox(10, gridPane);
-        Scene scene = new Scene(layout, 500, 500);
-        stage.setScene(scene);
-        stage.show();
     }
 
     public GridPane createGridPane() {
-        GridPane gridPane = new GridPane();
-
         int cellSize = 20; // Taille des cellules en pixels
-
+        
+        GridPane gridPane = new GridPane();
         for (int i = 0; i < GameOfLife.grid.gridDimension; i++) {
             for (int j = 0; j < GameOfLife.grid.gridDimension; j++) {
                 Rectangle cell = new Rectangle(cellSize, cellSize);
@@ -79,13 +85,7 @@ public class GameOfLife extends Application {
                 gridPane.add(cell, j, i); // (colonne, ligne)
             }
         }
-
         return gridPane;
-    }
-
-    private boolean isAlive(int cell) {
-        if (cell == 1) return true;
-        else return false;
     }
 
     private int getChangeState(int cell, int i, int j) {
@@ -106,4 +106,21 @@ public class GameOfLife extends Application {
 
         return cell;  // Si aucune condition n'est remplie (ce qui ne devrait pas arriver)
     }
+
+    private void updateGridPane() {
+        for (Node node : gridPane.getChildren()) {
+            if (node instanceof Rectangle) {
+                Rectangle rect = (Rectangle) node;
+                Integer rowObj = GridPane.getRowIndex(rect);
+                Integer colObj = GridPane.getColumnIndex(rect);
+    
+                // Utiliser 0 si la valeur est null (JavaFX peut ne pas stocker ces indices)
+                int row = (rowObj != null) ? rowObj : 0;
+                int col = (colObj != null) ? colObj : 0;
+    
+                int state = GameOfLife.grid.getCell(row, col);
+                rect.setFill(state == 1 ? Color.BLACK : Color.WHITE);
+            }
+        }
+    }       
 }
