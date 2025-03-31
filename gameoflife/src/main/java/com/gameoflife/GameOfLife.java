@@ -14,6 +14,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 
+import com.gameoflife.utils.Constants;
+
 public class GameOfLife extends Application {
     public static Grid grid;
     private GridPane gridPane;
@@ -47,12 +49,14 @@ public class GameOfLife extends Application {
 
     @Override
     public void start(final Stage stage) throws Exception {
+        int layoutDimension = Constants.calcGridWidth(GameOfLife.grid.gridDimension);
+
         // set title for the stage
         stage.setTitle("Game of Life");
 
         this.gridPane = createGridPane();
         VBox layout = new VBox(10, this.gridPane);
-        Scene scene = new Scene(layout, 500, 500);
+        Scene scene = new Scene(layout, layoutDimension, layoutDimension);
         stage.setScene(scene);
         stage.show();
 
@@ -73,7 +77,7 @@ public class GameOfLife extends Application {
     }
 
     public GridPane createGridPane() {
-        int cellSize = 20; // Taille des cellules en pixels
+        int cellSize = Constants.CELL_WIDTH; // Taille des cellules en pixels
         
         GridPane gridPane = new GridPane();
         for (int i = 0; i < GameOfLife.grid.gridDimension; i++) {
